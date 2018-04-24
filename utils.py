@@ -180,34 +180,66 @@ def dpSparsifyVGG16(para_dict, dp):
     """
     dp: usage percentage of channels in each layer
     """
-    new_dict = {}
+    # new_dict = {}
+    # first = True
+    # for k,v in sorted(para_dict.items()):
+    #     if 'conv1_1_' in k:
+    #         new_dict[k] = v
+    #     elif 'bn_mean' in k:
+    #         new_dict[k] = v[:int(len(v)*dp)]
+    #     elif 'bn_variance' in k:
+    #         new_dict[k] = v[:int(len(v)*dp)]
+    #     elif 'gamma' in k:
+    #         new_dict[k] = v[:int(len(v)*dp)]
+    #     elif 'beta' in k:
+    #         new_dict[k] = v[:int(len(v)*dp)]
+    #     elif 'fc_1' in k:
+    #         O = v[0].shape[0]
+    #         new_dict[k] = [v[0][:int(O*dp),:], v[1]]
+    #     elif 'conv' in k:
+    #         O = v[0].shape[3]
+    #         if first:
+    #             new_dict[k] = v[0][:,:,:,:], v[1][:] #int(O*dp)
+    #             first = False
+    #             last = O
+    #         else:
+    #             new_dict[k] = v[0][:,:,:last,:int(O*dp)], v[1][:int(O*dp)]
+    #             last = int(O*dp)
+    #     else:
+    #         new_dict[k] = v
+    #         continue
+    # return new_dict
     first = True
+    new_dict = {}
+    last = 3
     for k,v in sorted(para_dict.items()):
-        if 'conv1_1_' in k:
-            new_dict[k] = v
-        elif 'bn_mean' in k:
+        if 'bn_mean' in k:
             new_dict[k] = v[:int(len(v)*dp)]
+            print("%s:%s" % (k, new_dict[k].shape))
         elif 'bn_variance' in k:
             new_dict[k] = v[:int(len(v)*dp)]
+            print("%s:%s" % (k, new_dict[k].shape))
         elif 'gamma' in k:
             new_dict[k] = v[:int(len(v)*dp)]
+            print("%s:%s" % (k, new_dict[k].shape))
         elif 'beta' in k:
             new_dict[k] = v[:int(len(v)*dp)]
+            print("%s:%s" % (k, new_dict[k].shape))
         elif 'fc_1' in k:
             O = v[0].shape[0]
             new_dict[k] = [v[0][:int(O*dp),:], v[1]]
         elif 'conv' in k:
             O = v[0].shape[3]
-            if first:
-                new_dict[k] = v[0][:,:,:,:], v[1][:] #int(O*dp)
-                first = False
-                last = O
-            else:
-                new_dict[k] = v[0][:,:,:last,:int(O*dp)], v[1][:int(O*dp)]
-                last = int(O*dp)
+            new_dict[k] = v[0][:,:,:last,:int(O*dp)], v[1][:int(O*dp)]
+            # if first:
+            #     first = False
+            #     last = O
+            # else:
+            last = int(O*dp)
+            print("W%s:%s" % (k, new_dict[k][0].shape))
+            print("b%s:%s" % (k, new_dict[k][1].shape))
         else:
             new_dict[k] = v
-            continue
     return new_dict
 
 def count_number_params(para_dict):
